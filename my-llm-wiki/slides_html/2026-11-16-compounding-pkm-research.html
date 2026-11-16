@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>簡報：從原子化筆記到知識複利系統</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <style>
+    :root { --bg: #FAFAFA; --card: #FFFFFF; --text: #1E293B; --muted: #64748B; --accent: #2563EB; --border: #E2E8F0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 2rem; background: var(--card); border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .topbar a, .topbar button { background: var(--card); border: 1px solid var(--border); padding: 0.35rem 0.8rem; border-radius: 6px; text-decoration: none; color: var(--text); cursor: pointer; margin-left: 0.5rem; font-size: 0.85rem; }
+    .topbar button:hover, .topbar a:hover { border-color: var(--accent); color: var(--accent); }
+    .stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .slide { display: none; width: 100%; max-width: 960px; min-height: 520px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 3.5rem 4rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04); flex-direction: column; justify-content: center; }
+    .slide.active { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .badge { display: inline-block; background: #EFF6FF; color: var(--accent); font-weight: 600; font-size: 0.85rem; padding: 0.3rem 0.8rem; border-radius: 999px; margin-bottom: 1.2rem; width: fit-content; }
+    h1 { font-size: 2.6rem; line-height: 1.3; margin-bottom: 1rem; color: #0F172A; }
+    h2 { font-size: 1.9rem; margin-bottom: 1.8rem; padding-bottom: 0.8rem; border-bottom: 2px solid #EFF6FF; color: #0F172A; }
+    .subtitle { font-size: 1.25rem; color: var(--muted); }
+    ul { list-style: none; display: flex; flex-direction: column; gap: 1.1rem; }
+    li { font-size: 1.25rem; line-height: 1.6; padding-left: 1.6rem; position: relative; }
+    li::before { content: "▪"; color: var(--accent); position: absolute; left: 0; font-size: 1.4rem; line-height: 1.4; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .box { background: #F8FAFC; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+    .box h3 { color: var(--accent); margin-bottom: 0.8rem; font-size: 1.2rem; }
+    .formula-box { background: #EFF6FF; border-left: 4px solid var(--accent); padding: 1.2rem 1.5rem; border-radius: 8px; margin-top: 1.2rem; font-size: 1.2rem; }
+    .notes-panel { display: none; background: #1E293B; color: #F8FAFC; padding: 1rem 2rem; font-size: 0.95rem; line-height: 1.6; }
+    .notes-panel.show { display: block; }
+    .controls { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 2rem; background: var(--card); border-top: 1px solid var(--border); }
+    .controls button { background: var(--accent); color: #fff; border: none; padding: 0.45rem 1.1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    .controls button:disabled { background: #CBD5E1; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span>📽️ <strong>現代學術極簡簡報</strong>｜從原子化筆記到知識複利系統</span>
+    <div>
+      <button onclick="toggleNotes()">講者備忘錄 (S)</button>
+      <button onclick="document.documentElement.requestFullscreen()">全螢幕</button>
+      <a href="../index.html">← 返回知識庫</a>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="slide active" data-note="大家好，今天這份簡報完全基於我們知識庫裡已收錄的兩篇核心筆記生成，探討如何解決筆記越寫越亂、AI 問答無法累積知識的痛點。">
+      <div class="badge">LLM Wiki 研究報告產出</div>
+      <h1>從原子化筆記到知識複利系統</h1>
+      <p class="subtitle">結合 UI 原子設計與 Karpathy 持久化維基的個人知識庫實踐</p>
+    </div>
+
+    <div class="slide" data-note="無論是人類用資料夾整理筆記，還是直接把檔案丟給傳統 RAG，都會遇到知識碎片化的問題。關鍵在於我們沒有定義最小單元，也沒有人能持續維護連結。">
+      <h2>核心痛點：為什麼知識無法累積？</h2>
+      <div class="grid-2">
+        <div class="box">
+          <h3>人工分類困境</h3>
+          <p>筆記破 300 則後，預先設定的「由上至下」樹狀資料夾必然崩潰。</p>
+        </div>
+        <div class="box">
+          <h3>傳統 RAG 困境</h3>
+          <p>每次提問都從零撈取碎片並重新拼湊，缺乏跨文件長期沉澱。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide" data-note="參考設計領域的 Atomic Design，我們把筆記拆成名詞與觀念兩種最小積木，透過由下至上的方式持續積累。">
+      <h2>解法一：借鏡 UI 的原子化筆記法</h2>
+      <ul>
+        <li><strong>名詞筆記（關鍵字層）</strong>：一個關鍵字即一篇詞條頁，作為知識索引節點。</li>
+        <li><strong>觀念筆記（理解層）</strong>：用自己的話寫下理解，可被多個名詞重複引用。</li>
+        <li><strong>由下至上積累</strong>：不預設僵化框架，讓主題隨連結密度自然湧現。</li>
+      </ul>
+    </div>
+
+    <div class="slide" data-note="透過 Karpathy 提出的 LLM Wiki 架構，人類只需負責找資料與提問，繁瑣的更新連結與摘要全部交給 AI 依照 AGENTS.md 自動完成。">
+      <h2>解法二：LLM Wiki 持久化維基架構</h2>
+      <ul>
+        <li><strong>三層架構分工</strong>：<code>raw/</code> 唯讀真相、<code>wiki/</code> AI 全權維護、<code>AGENTS.md</code> 規範。</li>
+        <li><strong>增量編譯（Ingest）</strong>：新資料直接擴充既有概念頁，並主動標記觀點矛盾。</li>
+      </ul>
+      <div class="formula-box">
+        <strong>知識複利價值概念模型：</strong> $$V \propto N \cdot \log(1 + k)$$
+      </div>
+    </div>
+
+    <div class="slide" data-note="這份研究嚴格遵守只引用 Wiki 內文的原則，而系統自動幫我們找到的兩篇外部推薦文獻，只要點擊下載放入 raw 資料夾，就能展開下一輪的知識複利循環。">
+      <h2>知識庫缺口與下一步（待 Wiki 化文獻）</h2>
+      <ul>
+        <li><strong>嚴格知識邊界</strong>：未收錄之細節絕不混入正文，確保論點 100% 可追溯。</li>
+        <li><strong>外部文獻推薦</strong>：已自動檢索「Zettelkasten 筆記法」與「QMD 混合檢索」。</li>
+        <li><strong>持續複利循環</strong>：一鍵下載文獻 ➔ 放入 <code>raw/</code> ➔ 執行 Ingest 擴充維基。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="notes-panel" id="notesPanel"></div>
+
+  <div class="controls">
+    <button id="prevBtn" onclick="changeSlide(-1)">← 上一頁</button>
+    <span id="indicator">1 / 5</span>
+    <button id="nextBtn" onclick="changeSlide(1)">下一頁 →</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let idx = 0;
+    function updateSlide() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      document.getElementById('indicator').textContent = `${idx + 1} / ${slides.length}`;
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').disabled = idx === slides.length - 1;
+      document.getElementById('notesPanel').textContent = '🎙️ 講者備忘錄：' + slides[idx].dataset.note;
+    }
+    function changeSlide(dir) {
+      idx = Math.max(0, Math.min(slides.length - 1, idx + dir));
+      updateSlide();
+    }
+    function toggleNotes() { document.getElementById('notesPanel').classList.toggle('show'); }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+      if (e.key.toLowerCase() === 's') toggleNotes();
+    });
+    updateSlide();
+  </script>
+</body>
+</html>
