@@ -14,25 +14,17 @@
   <header>
     <h1>📚 個人學習筆記 LLM Wiki</h1>
     <nav>
-      <button onclick="loadPage('wiki/index.md')" id="btn-index">總目錄 (Index)</button>
-      <button onclick="loadPage('notes/2026-11-16-compounding-pkm-research.md')" id="btn-notes">研究筆記 (Notes)</button>
-      <a href="slides_html/2026-11-16-compounding-pkm-research.html" class="nav-slide-btn">📽️ 播放簡報</a>
-      <button onclick="loadPage('wiki/log.md')" id="btn-log">演進日誌 (Log)</button>
+      <button onclick="loadPage('index.md')" id="btn-index">總目錄 (Index)</button>
+      <button onclick="loadPage('2026-11-16-compounding-pkm-research.md')" id="btn-notes">研究筆記 (Notes)</button>
+      <a href="2026-11-16-compounding-pkm-research.html" class="nav-slide-btn">📽️ 播放簡報</a>
+      <button onclick="loadPage('log.md')" id="btn-log">演進日誌 (Log)</button>
       <button onclick="loadPage('AGENTS.md')" id="btn-agents">AGENTS.md</button>
     </nav>
   </header>
   <main id="content">載入知識庫中...</main>
   <script>
-    let currentPath = 'wiki/index.md';
-    function resolvePath(basePath, relativePath) {
-      if (relativePath.startsWith('http')) return relativePath;
-      const stack = basePath.split('/'); stack.pop();
-      for (const part of relativePath.split('/')) {
-        if (part === '.') continue;
-        if (part === '..') stack.pop();
-        else stack.push(part);
-      }
-      return stack.join('/');
+    function getFileName(href) {
+      return href.split('/').pop();
     }
     function downloadRawMd(title, url, reason, filename) {
       const mdContent = `# 原始文獻：${title}\n- 來源網址：${url}\n- 推薦收錄理由：${reason}\n- 匯入日期：${new Date().toISOString().slice(0,10)}\n\n（請將此檔案放入 raw/ 資料夾，並請 AI 執行工作流 A 進行 Wiki 化吸收）\n`;
@@ -43,16 +35,19 @@
       a.click();
     }
     async function loadPage(path) {
-      currentPath = path;
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-      if (path === 'wiki/index.md') document.getElementById('btn-index').classList.add('active');
-      if (path.startsWith('notes/')) document.getElementById('btn-notes').classList.add('active');
-      if (path === 'wiki/log.md') document.getElementById('btn-log').classList.add('active');
+      if (path === 'index.md') document.getElementById('btn-index').classList.add('active');
+      if (path.includes('compounding-pkm-research.md')) document.getElementById('btn-notes').classList.add('active');
+      if (path === 'log.md') document.getElementById('btn-log').classList.add('active');
       if (path === 'AGENTS.md') document.getElementById('btn-agents').classList.add('active');
 
       const res = await fetch(path);
+      if (!res.ok) {
+        document.getElementById('content').innerHTML = `<div class="meta-badge">❌ 找不到檔案：${path}</div>`;
+        return;
+      }
       let text = await res.text();
-      let metaHtml = `<div class="meta-badge">📄 檔案路徑：${path}</div>`;
+      let metaHtml = `<div class="meta-badge">📄 檔案：${path}</div>`;
       if (text.startsWith('---')) {
         const end = text.indexOf('---', 3);
         if (end !== -1) text = text.slice(end + 3).trim();
@@ -60,14 +55,12 @@
       const contentEl = document.getElementById('content');
       contentEl.innerHTML = metaHtml + marked.parse(text);
 
-      // 渲染 KaTeX 數學公式
       if (window.renderMathInElement) {
         renderMathInElement(contentEl, {
           delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]
         });
       }
 
-      // 將建議收錄文獻加上「一鍵下載 .md 準備放入 raw/」按鈕
       contentEl.querySelectorAll('li').forEach(li => {
         if (li.textContent.includes('建議檔名：')) {
           const link = li.querySelector('a');
@@ -87,11 +80,13 @@
       contentEl.querySelectorAll('a').forEach(link => {
         const href = link.getAttribute('href');
         if (href && href.endsWith('.md')) {
-          link.addEventListener('click', (e) => { e.preventDefault(); loadPage(resolvePath(currentPath, href)); });
+          link.addEventListener('click', (e) => { e.preventDefault(); loadPage(getFileName(href)); });
+        } else if (href && href.endsWith('.html')) {
+          link.setAttribute('href', getFileName(href));
         }
       });
     }
-    loadPage('wiki/index.md');
+    loadPage('index.md');
   </script>
 </body>
 </html>
